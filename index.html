@@ -1,51 +1,292 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-AU">
 <head>
-  <meta charset="UTF-8">
-  <title>Super vs Mortgage Calculator</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Divergent Wealth | Home Loan Stress Test Calculator</title>
+  <style>
+    :root {
+      --dw-ink: #111111;
+      --dw-muted: #5f6368;
+      --dw-line: #dedbd3;
+      --dw-bg: #f7f4ef;
+      --dw-card: #ffffff;
+      --dw-accent: #222222;
+      --dw-soft: #ebe7df;
+      --dw-success: #1f5c45;
+      --dw-warning: #8a4b12;
+      --dw-radius: 22px;
+      --dw-shadow: 0 20px 60px rgba(17,17,17,0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--dw-ink);
+      background: radial-gradient(circle at top left, #ffffff 0, var(--dw-bg) 34rem);
+      line-height: 1.45;
+    }
+    .dw-wrap { max-width: 1180px; margin: 0 auto; padding: 32px 20px 56px; }
+    .dw-hero {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 28px;
+      align-items: stretch;
+      margin-bottom: 24px;
+    }
+    .dw-panel, .dw-card {
+      background: rgba(255,255,255,0.92);
+      border: 1px solid var(--dw-line);
+      border-radius: var(--dw-radius);
+      box-shadow: var(--dw-shadow);
+    }
+    .dw-panel { padding: 32px; }
+    .dw-kicker { letter-spacing: .12em; text-transform: uppercase; font-size: 12px; color: var(--dw-muted); font-weight: 700; }
+    h1 { font-size: clamp(36px, 5vw, 64px); line-height: .96; margin: 14px 0 18px; letter-spacing: -0.05em; }
+    .dw-lead { font-size: 18px; color: #333; max-width: 760px; }
+    .dw-disclaimer { font-size: 13px; color: var(--dw-muted); margin-top: 18px; border-top: 1px solid var(--dw-line); padding-top: 16px; }
+    .dw-stat-card { padding: 26px; display: flex; flex-direction: column; justify-content: space-between; min-height: 280px; }
+    .dw-stat-card strong { font-size: 44px; letter-spacing: -0.05em; }
+    .dw-grid { display: grid; grid-template-columns: 0.95fr 1.05fr; gap: 24px; align-items: start; }
+    .dw-card { padding: 24px; }
+    .dw-card h2 { margin: 0 0 16px; font-size: 24px; letter-spacing: -0.03em; }
+    .dw-section-title { margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--dw-line); }
+    .dw-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    label { display: block; font-size: 13px; color: var(--dw-muted); font-weight: 700; margin-bottom: 6px; }
+    input, select {
+      width: 100%;
+      border: 1px solid var(--dw-line);
+      border-radius: 14px;
+      padding: 12px 12px;
+      font-size: 16px;
+      background: #fff;
+      color: var(--dw-ink);
+    }
+    input:focus, select:focus { outline: 2px solid #111; outline-offset: 2px; }
+    .dw-full { grid-column: 1 / -1; }
+    .dw-toggle { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: var(--dw-soft); padding: 6px; border-radius: 16px; margin-bottom: 18px; }
+    .dw-toggle button { border: 0; padding: 12px; border-radius: 12px; background: transparent; font-weight: 700; cursor: pointer; }
+    .dw-toggle button.active { background: #111; color: #fff; }
+    .dw-actions { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+    button.dw-button { border: 0; border-radius: 999px; padding: 12px 18px; font-weight: 700; cursor: pointer; background: #111; color: #fff; }
+    button.dw-button.secondary { background: #fff; color: #111; border: 1px solid var(--dw-line); }
+    .dw-results { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .dw-result { background: var(--dw-soft); border-radius: 18px; padding: 18px; min-height: 122px; }
+    .dw-result small { display: block; color: var(--dw-muted); font-weight: 700; margin-bottom: 8px; }
+    .dw-result strong { display: block; font-size: 28px; letter-spacing: -0.04em; }
+    .dw-result span { display: block; color: var(--dw-muted); font-size: 13px; margin-top: 8px; }
+    .dw-result.highlight { background: #111; color: #fff; }
+    .dw-result.highlight small, .dw-result.highlight span { color: rgba(255,255,255,.72); }
+    .dw-chart { margin-top: 18px; padding: 18px; border: 1px solid var(--dw-line); border-radius: 18px; background: #fff; }
+    .bar-row { display: grid; grid-template-columns: 120px 1fr 96px; gap: 10px; align-items: center; margin: 12px 0; font-size: 13px; }
+    .bar-track { height: 14px; background: var(--dw-soft); border-radius: 999px; overflow: hidden; }
+    .bar-fill { height: 100%; background: #111; border-radius: 999px; min-width: 2px; }
+    .dw-notes { margin-top: 18px; font-size: 13px; color: var(--dw-muted); }
+    .dw-notes ul { margin: 8px 0 0; padding-left: 18px; }
+    .dw-hidden { display: none; }
+    .dw-footer { margin-top: 24px; font-size: 12px; color: var(--dw-muted); }
+    @media (max-width: 900px) { .dw-hero, .dw-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 640px) { .dw-panel, .dw-card { padding: 20px; } .dw-form-grid, .dw-results { grid-template-columns: 1fr; } .bar-row { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
-  <h2>Super vs Mortgage - Where Should You Put Extra Money?</h2>
-  
-  <label>Extra Monthly Contribution: $<input id="monthly" type="number" value="500"></label><br>
-  <label>Mortgage Interest Rate (%): <input id="mortgageRate" type="number" value="6"></label><br>
-  <label>Super Return Rate (%): <input id="superReturn" type="number" value="7"></label><br>
-  <label>Marginal Tax Rate (%): <input id="taxRate" type="number" value="34.5"></label><br>
-  <label>Years: <input id="years" type="number" value="10"></label><br><br>
+  <main class="dw-wrap">
+    <section class="dw-hero">
+      <div class="dw-panel">
+        <div class="dw-kicker">Divergent Wealth</div>
+        <h1>Home Loan Stress Test Calculator</h1>
+        <p class="dw-lead">Model how interest-rate changes, loan structure, rent, ownership costs and property-value movements may affect the true cost of holding a home or investment property.</p>
+        <p class="dw-disclaimer"><strong>General information only.</strong> This calculator is a modelling tool. It does not provide personal financial advice, tax advice, legal advice, credit assistance, or a lending recommendation. Results are estimates based on the information entered and the assumptions shown.</p>
+      </div>
+      <aside class="dw-card dw-stat-card">
+        <div>
+          <div class="dw-kicker">Current scenario</div>
+          <strong id="heroRepayment">$0</strong>
+          <p id="heroLabel">Estimated monthly repayment</p>
+        </div>
+        <p class="dw-disclaimer">No information is saved or sent anywhere. This page runs in your browser and can be used offline.</p>
+      </aside>
+    </section>
 
-  <button onclick="calculate()">Compare</button>
+    <section class="dw-grid">
+      <form id="dwCalc" class="dw-card">
+        <h2>Inputs</h2>
+        <div class="dw-toggle" role="group" aria-label="Property use">
+          <button type="button" id="ownerBtn" class="active">Owner-occupier</button>
+          <button type="button" id="investorBtn">Investment</button>
+        </div>
 
-  <h3>Results:</h3>
-  <div id="results"></div>
+        <div class="dw-form-grid">
+          <div><label for="propertyValue">Property value</label><input id="propertyValue" type="number" value="1200000" min="0" step="1000" /></div>
+          <div><label for="loanAmount">Loan amount</label><input id="loanAmount" type="number" value="780000" min="0" step="1000" /></div>
+          <div><label for="rate">Interest rate p.a. (%)</label><input id="rate" type="number" value="6.25" min="0" step="0.01" /></div>
+          <div><label for="rateShock">Rate stress test (+/- %)</label><input id="rateShock" type="number" value="2.00" step="0.25" /></div>
+          <div><label for="termYears">Remaining loan term (years)</label><input id="termYears" type="number" value="25" min="1" max="40" step="1" /></div>
+          <div><label for="frequency">Repayment frequency</label><select id="frequency"><option value="12">Monthly</option><option value="26">Fortnightly</option><option value="52">Weekly</option></select></div>
+          <div><label for="offset">Offset balance</label><input id="offset" type="number" value="50000" min="0" step="1000" /></div>
+          <div><label for="extraRepayment">Extra repayment per period</label><input id="extraRepayment" type="number" value="0" min="0" step="50" /></div>
+          <div><label for="holdingYears">Projection period (years)</label><input id="holdingYears" type="number" value="10" min="1" max="40" step="1" /></div>
+          <div><label for="growthRate">Property growth p.a. (%)</label><input id="growthRate" type="number" value="3.00" step="0.25" /></div>
+          <div><label for="annualCosts">Annual ownership costs</label><input id="annualCosts" type="number" value="9000" min="0" step="100" /></div>
+          <div><label for="taxRate">Marginal tax rate incl Medicare (%)</label><input id="taxRate" type="number" value="39.00" min="0" max="60" step="0.5" /></div>
+
+          <div class="investor-only dw-hidden"><label for="weeklyRent">Weekly rent</label><input id="weeklyRent" type="number" value="750" min="0" step="10" /></div>
+          <div class="investor-only dw-hidden"><label for="vacancyWeeks">Vacancy allowance (weeks p.a.)</label><input id="vacancyWeeks" type="number" value="2" min="0" max="52" step="1" /></div>
+          <div class="investor-only dw-hidden"><label for="deductiblePercent">Deductible expense portion (%)</label><input id="deductiblePercent" type="number" value="100" min="0" max="100" step="1" /></div>
+          <div class="investor-only dw-hidden"><label for="managementFee">Property management fee (% of rent)</label><input id="managementFee" type="number" value="7.7" min="0" step="0.1" /></div>
+        </div>
+
+        <div class="dw-actions">
+          <button class="dw-button" type="button" id="calcBtn">Calculate</button>
+          <button class="dw-button secondary" type="button" id="resetBtn">Reset</button>
+        </div>
+      </form>
+
+      <section class="dw-card">
+        <h2>Results</h2>
+        <div class="dw-results">
+          <div class="dw-result highlight"><small>Current repayment</small><strong id="currentPayment">$0</strong><span id="paymentFreqLabel">Per month</span></div>
+          <div class="dw-result"><small>Stress-tested repayment</small><strong id="stressPayment">$0</strong><span id="stressLabel">At higher rate</span></div>
+          <div class="dw-result"><small>Estimated LVR</small><strong id="lvr">0%</strong><span>Loan divided by property value</span></div>
+          <div class="dw-result"><small>Total interest estimate</small><strong id="totalInterest">$0</strong><span>Scheduled P&I loan, before extra repayments</span></div>
+          <div class="dw-result"><small>Projected property value</small><strong id="futureValue">$0</strong><span id="futureValueLabel">After projection period</span></div>
+          <div class="dw-result"><small>Projected equity</small><strong id="futureEquity">$0</strong><span>Projected value less estimated loan balance</span></div>
+          <div class="dw-result investor-output dw-hidden"><small>Investment cashflow before tax</small><strong id="beforeTaxCashflow">$0</strong><span>Rent less repayments and holding costs</span></div>
+          <div class="dw-result investor-output dw-hidden"><small>Indicative after-tax cashflow</small><strong id="afterTaxCashflow">$0</strong><span>Simplified estimate, not tax advice</span></div>
+        </div>
+
+        <div class="dw-chart" aria-label="Scenario comparison chart">
+          <div class="bar-row"><div>Current</div><div class="bar-track"><div id="barCurrent" class="bar-fill"></div></div><div id="barCurrentText">$0</div></div>
+          <div class="bar-row"><div>Higher rate</div><div class="bar-track"><div id="barHigher" class="bar-fill"></div></div><div id="barHigherText">$0</div></div>
+          <div class="bar-row"><div>Lower rate</div><div class="bar-track"><div id="barLower" class="bar-fill"></div></div><div id="barLowerText">$0</div></div>
+        </div>
+
+        <div class="dw-notes">
+          <strong>Assumptions shown:</strong>
+          <ul>
+            <li>Principal and interest repayments only.</li>
+            <li>Interest is modelled using the repayment frequency selected.</li>
+            <li>Offset reduces modelled interest cost but does not reduce the scheduled contractual repayment.</li>
+            <li>Investment tax impact is simplified and assumes deductible expenses are deductible to the percentage entered.</li>
+          </ul>
+        </div>
+      </section>
+    </section>
+
+    <section class="dw-card dw-footer">
+      <strong>Important:</strong> This calculator is a guide only. It does not assess suitability, borrowing capacity, product eligibility, refinancing costs, stamp duty, capital gains tax, depreciation, land tax thresholds, lender fees, insurance differences, or your personal objectives and circumstances.
+    </section>
+  </main>
 
   <script>
-    function calculate() {
-      const monthly = parseFloat(document.getElementById("monthly").value);
-      const mortgageRate = parseFloat(document.getElementById("mortgageRate").value) / 100;
-      const superReturn = parseFloat(document.getElementById("superReturn").value) / 100;
-      const taxRate = parseFloat(document.getElementById("taxRate").value) / 100;
-      const years = parseInt(document.getElementById("years").value);
-      const months = years * 12;
+    const $ = (id) => document.getElementById(id);
+    let mode = 'owner';
 
-      // Mortgage savings (compounded monthly)
-      let mortgageSavings = 0;
-      for (let i = 0; i < months; i++) {
-        mortgageSavings = (mortgageSavings + monthly) * (1 + mortgageRate / 12);
-      }
+    const fmt = new Intl.NumberFormat('en-AU', { style: 'currency', currency: 'AUD', maximumFractionDigits: 0 });
+    const pct = (n) => `${Number.isFinite(n) ? n.toFixed(1) : '0.0'}%`;
+    const num = (id) => Number($(id).value || 0);
 
-      // Super contribution tax-adjusted
-      const superMonthly = monthly * (1 - 0.15); // Super contributions taxed at 15%
-      let superValue = 0;
-      for (let i = 0; i < months; i++) {
-        superValue = (superValue + superMonthly) * (1 + superReturn / 12);
-      }
-
-      document.getElementById("results").innerHTML = `
-        <p><strong>Mortgage Interest Saved:</strong> $${mortgageSavings.toFixed(2)}</p>
-        <p><strong>Value in Super (after 15% tax):</strong> $${superValue.toFixed(2)}</p>
-        <p><strong>Better Option:</strong> ${superValue > mortgageSavings ? "Super" : "Mortgage"}</p>
-      `;
+    function repayment(principal, annualRate, years, freq) {
+      const periods = Math.max(1, years * freq);
+      const r = annualRate / 100 / freq;
+      if (principal <= 0) return 0;
+      if (r === 0) return principal / periods;
+      return principal * r / (1 - Math.pow(1 + r, -periods));
     }
+
+    function simulateBalance(principal, annualRate, years, freq, scheduledPayment, extra, offset) {
+      let balance = principal;
+      const maxPeriods = Math.round(years * freq);
+      const r = annualRate / 100 / freq;
+      let totalInterest = 0;
+      let periodsUsed = 0;
+      for (let i = 0; i < maxPeriods && balance > 0; i++) {
+        const interestBase = Math.max(0, balance - offset);
+        const interest = interestBase * r;
+        const principalPaid = Math.max(0, scheduledPayment + extra - interest);
+        balance = Math.max(0, balance + interest - scheduledPayment - extra);
+        totalInterest += interest;
+        periodsUsed += 1;
+        if (principalPaid <= 0 && scheduledPayment + extra <= interest) break;
+      }
+      return { balance, totalInterest, periodsUsed };
+    }
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      $('ownerBtn').classList.toggle('active', mode === 'owner');
+      $('investorBtn').classList.toggle('active', mode === 'investor');
+      document.querySelectorAll('.investor-only, .investor-output').forEach(el => el.classList.toggle('dw-hidden', mode !== 'investor'));
+      calculate();
+    }
+
+    function calculate() {
+      const propertyValue = num('propertyValue');
+      const loanAmount = num('loanAmount');
+      const rate = num('rate');
+      const shock = num('rateShock');
+      const termYears = num('termYears');
+      const freq = Number($('frequency').value);
+      const offset = Math.min(num('offset'), loanAmount);
+      const extra = num('extraRepayment');
+      const holdingYears = num('holdingYears');
+      const growthRate = num('growthRate');
+      const annualCosts = num('annualCosts');
+      const taxRate = num('taxRate') / 100;
+
+      const current = repayment(loanAmount, rate, termYears, freq);
+      const higher = repayment(loanAmount, rate + shock, termYears, freq);
+      const lower = repayment(loanAmount, Math.max(0, rate - shock), termYears, freq);
+      const annualCurrent = current * freq;
+      const scheduled = simulateBalance(loanAmount, rate, termYears, freq, current, 0, 0);
+      const projected = simulateBalance(loanAmount, rate, Math.min(termYears, holdingYears), freq, current, extra, offset);
+      const futurePropertyValue = propertyValue * Math.pow(1 + growthRate / 100, holdingYears);
+      const futureEquity = futurePropertyValue - projected.balance;
+      const lvr = propertyValue > 0 ? loanAmount / propertyValue * 100 : 0;
+
+      const label = freq === 12 ? 'Per month' : freq === 26 ? 'Per fortnight' : 'Per week';
+      $('currentPayment').textContent = fmt.format(current);
+      $('stressPayment').textContent = fmt.format(higher);
+      $('stressLabel').textContent = `At ${(rate + shock).toFixed(2)}% p.a.`;
+      $('paymentFreqLabel').textContent = label;
+      $('lvr').textContent = pct(lvr);
+      $('totalInterest').textContent = fmt.format(scheduled.totalInterest);
+      $('futureValue').textContent = fmt.format(futurePropertyValue);
+      $('futureValueLabel').textContent = `After ${holdingYears} years at ${growthRate.toFixed(2)}% p.a.`;
+      $('futureEquity').textContent = fmt.format(futureEquity);
+      $('heroRepayment').textContent = fmt.format(freq === 12 ? current : current * freq / 12);
+      $('heroLabel').textContent = 'Estimated monthly repayment equivalent';
+
+      if (mode === 'investor') {
+        const weeklyRent = num('weeklyRent');
+        const vacancyWeeks = num('vacancyWeeks');
+        const deductiblePercent = num('deductiblePercent') / 100;
+        const managementFee = num('managementFee') / 100;
+        const annualRent = weeklyRent * Math.max(0, 52 - vacancyWeeks);
+        const managementCost = annualRent * managementFee;
+        const deductibleInterest = projected.totalInterest / Math.max(1, Math.min(termYears, holdingYears));
+        const deductibleExpenses = (deductibleInterest + annualCosts + managementCost) * deductiblePercent;
+        const beforeTax = annualRent - annualCurrent - annualCosts - managementCost;
+        const taxableRentalPosition = annualRent - deductibleExpenses;
+        const taxEffect = taxableRentalPosition < 0 ? Math.abs(taxableRentalPosition) * taxRate : -taxableRentalPosition * taxRate;
+        const afterTax = beforeTax + taxEffect;
+        $('beforeTaxCashflow').textContent = fmt.format(beforeTax);
+        $('afterTaxCashflow').textContent = fmt.format(afterTax);
+      }
+
+      const max = Math.max(current, higher, lower, 1);
+      const setBar = (id, textId, value) => { $(id).style.width = `${Math.max(3, value / max * 100)}%`; $(textId).textContent = fmt.format(value); };
+      setBar('barCurrent', 'barCurrentText', current);
+      setBar('barHigher', 'barHigherText', higher);
+      setBar('barLower', 'barLowerText', lower);
+    }
+
+    $('ownerBtn').addEventListener('click', () => setMode('owner'));
+    $('investorBtn').addEventListener('click', () => setMode('investor'));
+    $('calcBtn').addEventListener('click', calculate);
+    $('resetBtn').addEventListener('click', () => { $('dwCalc').reset(); setMode('owner'); });
+    document.querySelectorAll('input, select').forEach(el => el.addEventListener('input', calculate));
+    calculate();
   </script>
 </body>
 </html>
